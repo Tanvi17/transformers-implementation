@@ -30,3 +30,16 @@ class LayerNorm(nn.Module):
         mean = x.mean(-1, keepdim=True)
         std = x.std(-1, keepdim=True)
         return self.scale * (x - mean) / (std + self.epsilon) + self.shift
+
+
+class SubLayerConnection(nn.Module):
+    """A residual connection followed by a layer norm."""
+
+    def __init__(self, size: int, dropout_rate: float) -> None:
+        super().__init__()
+        self.norm_layer = LayerNorm(size)
+        self.dropout_layer = nn.Dropout(dropout_rate)
+
+    def forward(self, x: torch.Tensor, sublayer: nn.Module) -> torch.Tensor:
+        """Applies the residual connection and layer normalization."""
+        return x + self.dropout_layer(sublayer(self.norm_layer(x)))
